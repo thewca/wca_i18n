@@ -3,7 +3,7 @@
 require 'optparse'
 require 'wca_i18n'
 
-def run!
+def main
   verbose = false
   OptionParser.new do |opts|
     opts.banner = "Usage: #{__FILE__} [options] <base_translation_file> <translation_files>"
@@ -63,4 +63,4 @@ def indent(str, level)
   str.split("\n").map { |line| "\t"*level + line }.join("\n")
 end
 
-run! if __FILE__ == $0
+main
