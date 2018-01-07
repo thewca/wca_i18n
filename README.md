@@ -1,4 +1,4 @@
-# WcaI18n
+# WcaI18n [![Build Status](https://travis-ci.org/thewca/wca-i18n.svg?branch=master)](https://travis-ci.org/thewca/wca-i18n)
 
 Use this Gem to diff Rails translations.
 
