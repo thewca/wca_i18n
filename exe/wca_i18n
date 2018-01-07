@@ -2,6 +2,7 @@
 
 require 'optparse'
 require 'wca_i18n'
+require 'colorize'
 
 def main
   verbose = false
@@ -22,7 +23,8 @@ def main
   base_translation = load_translation(base_translation_file)
   translations = translation_files.map { |f| load_translation(f) }.reject { |t| t.locale == base_translation.locale }
 
-  compare_base_with_translations(base_translation, translations.sort_by!(&:locale), verbose)
+  perfect = compare_base_with_translations(base_translation, translations.sort_by!(&:locale), verbose)
+  exit (perfect ? 0 : 1)
 end
 
 def load_translation(filename)
@@ -31,26 +33,37 @@ def load_translation(filename)
 end
 
 def compare_base_with_translations(base_translation, translations, verbose)
+  total_issue_count = 0
   translations.each do |translation|
     diff = translation.compare_to(base_translation)
-    puts "#{translation.locale}:#{indent(format_diff(diff, verbose), 1)}"
+    translation_issue_count = diff.values.map(&:length).sum
+    total_issue_count += translation_issue_count
+
+    prefix = (translation_issue_count == 0 ? "✔".green : "✗".red)
+    puts "#{prefix} #{translation.locale}:#{indent(format_diff(diff, verbose), 1)}"
   end
+
+  total_issue_count == 0
 end
 
 def format_diff(diff, verbose=false)
   types = [:missing, :outdated, :unused]
+  total = diff.values.map(&:length).sum
 
-  pretty_counts = types.map do |type|
-    contexts = diff[type]
-    pretty = "#{contexts.length} #{type.to_s}"
-    pretty += ":\n" + indent(format_contexts(contexts), 1) if verbose
-    pretty
-  end
-
-  if verbose
-    "\n" + pretty_counts.join("\n")
+  if total == 0
+    "Up to date"
+  elsif verbose
+    pretty_counts = types.map do |type|
+      contexts = diff[type]
+      pretty = "• #{contexts.length} #{type.to_s}"
+      if contexts.length > 0
+        pretty += ":\n#{indent(format_contexts(contexts), 1)}"
+      end
+      pretty
+    end
+    "#{total} total\n" + pretty_counts.join("\n")
   else
-    total = diff.values.map(&:length).sum
+    pretty_counts = types.map { |type| "#{diff[type].length} #{type.to_s}" }
     "#{total} total = #{pretty_counts.join(" + ")}"
   end
 end
