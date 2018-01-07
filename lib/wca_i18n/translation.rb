@@ -1,5 +1,6 @@
-require "wca_i18n/yaml_with_comments"
+require "json"
 require "digest"
+require "wca_i18n/yaml_with_comments"
 
 module WcaI18n
   TranslatedLeaf = Struct.new(:translated, :original_hash)
@@ -11,7 +12,7 @@ module WcaI18n
 
     def initialize(locale, file_content)
       self.locale = locale.to_s
-      self.data = commented_yaml_to_translated_yaml(YamlWithComments.parse(file_content))
+      self.data = commented_yaml_to_translated_yaml(YAMLWithComments.parse(file_content))
     end
 
     def compare_to(base)
@@ -28,7 +29,7 @@ module WcaI18n
     private def commented_yaml_to_translated_yaml(commented_value)
       if leaf?(commented_value.value)
         original_hash = extract_original_hash_from_comment(commented_value.comment)
-        return TranslatedLeaf.new(commented_value.value, original_hash)
+        return TranslatedLeaf.new(commented_value.strip_comments, original_hash)
       end
 
       commented_value.value.map do |key, value|

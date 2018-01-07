@@ -1,8 +1,6 @@
 # WcaI18n
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/wca_i18n`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Use this Gem to diff Rails translations.
 
 ## Installation
 
@@ -22,7 +20,22 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Using the wca_i18n executable
+
+Use the included `wca_i18n` binary to compare translations to a base translation to see
+how out of date they are.
+
+```bash
+$ wca_i18n en.yml *.yml
+```
+
+### Using the wca_i18n library
+
+There are two parts to this library: `WcaI18n::YAMLWithComments` (a YAML parser
+that preserves comments) and `WcaI18n::Translation` (used to load and diff
+translation YAML files). Until we have better documentation, it's best to look
+at our [specs](https://github.com/thewca/wca-i18n/tree/master/spec) for how to
+them.
 
 ## Development
 
@@ -32,7 +45,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/thewca/wca_i18n.
+Bug reports and pull requests are welcome on GitHub at https://github.com/thewca/wca-i18n.
 
 ## License
 

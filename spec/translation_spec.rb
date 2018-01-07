@@ -1,7 +1,7 @@
 RSpec.describe WcaI18n::Translation do
   context "#compare_to" do
     it "detects missing, unused, and outdated translations" do
-      en = WcaI18n::Translation.new("en", "
+      base = WcaI18n::Translation.new("en", "
         en:
           feature:
             happy: Happy
@@ -12,7 +12,7 @@ RSpec.describe WcaI18n::Translation do
             0: zero
             a: A
       ")
-      es = WcaI18n::Translation.new("es", "
+      translation = WcaI18n::Translation.new("es", "
         es:
           feature:
             # This translation is up to date.
@@ -31,7 +31,7 @@ RSpec.describe WcaI18n::Translation do
             b: B
       ")
 
-      expect(es.compare_to(en)).to eq({
+      expect(translation.compare_to(base)).to eq({
         missing: [ %w(feature new), ["super_new_feature", 0], %w(super_new_feature a) ],
         unused: [ %w(feature old), %w(removed_feature a), %w(removed_feature b) ],
         outdated: [ %w(feature star) ],
@@ -39,17 +39,17 @@ RSpec.describe WcaI18n::Translation do
     end
 
     it "handles a string that changed into a tree" do
-      en = WcaI18n::Translation.new("en", "
+      base = WcaI18n::Translation.new("en", "
         en:
           i_became_a_tree:
             foo: bar
       ")
-      es = WcaI18n::Translation.new("es", "
+      translation = WcaI18n::Translation.new("es", "
         es:
           i_became_a_tree: but i was once a string
       ")
 
-      expect(es.compare_to(en)).to eq({
+      expect(translation.compare_to(base)).to eq({
         missing: [ %w(i_became_a_tree foo) ],
         unused: [ %w(i_became_a_tree) ],
         outdated: [],
@@ -57,21 +57,116 @@ RSpec.describe WcaI18n::Translation do
     end
 
     it "handles a tree that changed into a string" do
-      en = WcaI18n::Translation.new("en", "
+      base = WcaI18n::Translation.new("en", "
         en:
           i_was_once_a_tree: but now i am a string
       ")
-      es = WcaI18n::Translation.new("es", "
+      translation = WcaI18n::Translation.new("es", "
         es:
           i_was_once_a_tree:
             see: i am a tree
       ")
 
-      expect(es.compare_to(en)).to eq({
+      expect(translation.compare_to(base)).to eq({
         missing: [ %w(i_was_once_a_tree) ],
         unused: [ %w(i_was_once_a_tree see) ],
         outdated: [],
       })
+    end
+
+    context "pluralization" do
+      it "detects when up to date" do
+        base = WcaI18n::Translation.new("en", "
+          en:
+            #context: Words used to describe combined round cutoffs
+            cutoff:
+              time:
+                one: '%{count} attempt to get < %{time}'
+                other: '%{count} attempts to get < %{time}'
+        ")
+        translation = WcaI18n::Translation.new("da", "
+          da:
+            cutoff:
+              #original_hash: cf458e7
+              time:
+                zero: '%{count} prøver at få < %{time}'
+                one: '%{count} prøver at få < %{time}'
+                other: '%{count} prøver at få < %{time}'
+        ")
+
+        expect(translation.compare_to(base)).to eq({
+          missing: [],
+          unused: [],
+          outdated: [],
+        })
+      end
+
+      it "detects when out of date" do
+        base = WcaI18n::Translation.new("en", "
+          en:
+            #context: Words used to describe combined round cutoffs
+            cutoff:
+              time:
+                one: '%{count} attempt to get < %{time}'
+                other: '%{count} attempts to get < %{time}'
+        ")
+        translation = WcaI18n::Translation.new("da", "
+          da:
+            cutoff:
+              #original_hash: this_is_wrong
+              time:
+                zero: '%{count} prøver at få < %{time}'
+                one: '%{count} prøver at få < %{time}'
+                other: '%{count} prøver at få < %{time}'
+        ")
+
+        expect(translation.compare_to(base)).to eq({
+          missing: [],
+          unused: [],
+          outdated: [ %w(cutoff time) ],
+        })
+      end
+
+      it "detects missing" do
+        base = WcaI18n::Translation.new("en", "
+          en:
+            #context: Words used to describe combined round cutoffs
+            cutoff:
+              time:
+                one: '%{count} attempt to get < %{time}'
+                other: '%{count} attempts to get < %{time}'
+        ")
+        translation = WcaI18n::Translation.new("da", "
+          da: {}
+        ")
+
+        expect(translation.compare_to(base)).to eq({
+          missing: [ %w(cutoff time) ],
+          unused: [],
+          outdated: [],
+        })
+      end
+
+      it "detects unused" do
+        base = WcaI18n::Translation.new("en", "
+          en: {}
+        ")
+        translation = WcaI18n::Translation.new("da", "
+          da:
+            cutoff:
+              #original_hash: this_is_wrong
+              time:
+                zero: '%{count} prøver at få < %{time}'
+                one: '%{count} prøver at få < %{time}'
+                other: '%{count} prøver at få < %{time}'
+        ")
+
+        expect(translation.compare_to(base)).to eq({
+          missing: [],
+          unused: [ %w(cutoff time) ],
+          outdated: [],
+        })
+      end
     end
   end
 end
