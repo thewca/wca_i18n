@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'wca_i18n'
+
+def run!
+  verbose = false
+  OptionParser.new do |opts|
+    opts.banner = "Usage: #{__FILE__} [options] <base_locale> <i18n_dir>"
+    opts.on("-v", "--verbose", "Run verbosely") do |v|
+      verbose = v
+    end
+  end.parse!
+
+  base_locale = ARGV.shift
+  throw "Please pass a base_locale" unless base_locale
+  i18n_dir = ARGV.shift
+  throw "Please pass a i18n_dir" unless i18n_dir
+
+  base = nil
+  translations = []
+
+  Dir.glob(File.join(i18n_dir, "*.yml")).each do |f|
+    locale = File.basename(f, ".*")
+    translation = WcaI18n::Translation.new(locale, File.read(f))
+    if locale == base_locale
+      base = translation
+    else
+      translations << translation
+    end
+  end
+
+  throw "Base translation for locale #{base_locale} not found" if not base
+
+  compare_base_with_translations(base, translations.sort_by!(&:locale), verbose)
+end
+
+def compare_base_with_translations(base, translations, verbose)
+  translations.each do |translation|
+    diff = translation.compare_to(base)
+    puts "#{translation.locale}:#{indent(format_diff(diff, verbose), 1)}"
+  end
+end
+
+def format_diff(diff, verbose=false)
+  types = [:missing, :outdated, :unused]
+
+  pretty_counts = types.map do |type|
+    contexts = diff[type]
+    pretty = "#{contexts.length} #{type.to_s}"
+    pretty += ":\n" + indent(format_contexts(contexts), 1) if verbose
+    pretty
+  end
+
+  if verbose
+    "\n" + pretty_counts.join("\n")
+  else
+    total = diff.values.map(&:length).sum
+    "#{total} total = #{pretty_counts.join(" + ")}"
+  end
+end
+
+def format_contexts(contexts)
+  contexts.map { |context| context.join(" > ") }.join("\n")
+end
+
+def indent(str, level)
+  str.split("\n").map { |line| "\t"*level + line }.join("\n")
+end
+
+run! if __FILE__ == $0
