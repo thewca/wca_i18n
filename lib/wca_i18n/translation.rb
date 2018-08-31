@@ -1,18 +1,15 @@
 require "json"
 require "digest"
-require "wca_i18n/yaml_with_comments"
+require "wca_i18n/yaml_with_original_hashes"
 
 module WcaI18n
-  TranslatedLeaf = Struct.new(:translated, :original_hash)
-
   class Translation
-    PLURALIZATION_KEYS = %w(zero one two few many other).freeze
 
     attr_accessor :locale, :data
 
     def initialize(locale, file_content)
       self.locale = locale.to_s
-      self.data = commented_yaml_to_translated_yaml(YAMLWithComments.parse(file_content))
+      self.data = YAMLWithOriginalHashes.parse(file_content)
     end
 
     def compare_to(base)
@@ -24,17 +21,6 @@ module WcaI18n
       # Please see this wiki page explaining why we do this: https://github.com/thewca/worldcubeassociation.org/wikigTranslating-the-website#translations-status-internals
       to_digest = pluralization?(value) ? JSON.generate(value) : value
       original_str = Digest::SHA1.hexdigest(to_digest)[0..6]
-    end
-
-    private def commented_yaml_to_translated_yaml(commented_value)
-      if leaf?(commented_value.value)
-        original_hash = extract_original_hash_from_comment(commented_value.comment)
-        return TranslatedLeaf.new(commented_value.strip_comments, original_hash)
-      end
-
-      commented_value.value.map do |key, value|
-        [key, commented_yaml_to_translated_yaml(value)]
-      end.to_h
     end
 
     private def diff_recursive(base, translation, context)
@@ -89,11 +75,6 @@ module WcaI18n
       elsif hashes.size > 1
         throw "Too many #{HASHTAG} occurrences in: #{comment}"
       end
-    end
-
-    private def leaf?(node)
-      # If the node is a pluralization it's also a leaf!
-      node.nil? || node.is_a?(String) || self.class.pluralization?(node)
     end
 
     def self.pluralization?(node)

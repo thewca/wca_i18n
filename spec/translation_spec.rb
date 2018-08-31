@@ -16,11 +16,11 @@ RSpec.describe WcaI18n::Translation do
         es:
           feature:
             # This translation is up to date.
-            # original_hash: #{WcaI18n::Translation.hash_translation("Happy")}
+            #original_hash: #{WcaI18n::Translation.hash_translation("Happy")}
             happy: Contento
 
             # This translation is outdated.
-            # original_hash: sooo_old
+            #original_hash: sooo_old
             star: Estrella
 
             # This translation is unused.
