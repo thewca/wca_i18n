@@ -6,16 +6,24 @@ module WcaI18n
   TranslatedLeaf = Struct.new(:translated, :original_hash)
 
   # Re-implement some parts of the ToRuby emitter to inject our TranslatedLeaf where needs be
-  class ToRubyEmitter < Psych::Visitors::ToRuby
+  class YAMLToEnrichedRubyHash < Psych::Visitors::ToRuby
     def self.create(original_hashes_map)
       class_loader = Psych::ClassLoader.new
       scanner      = Psych::ScalarScanner.new class_loader
       new(scanner, class_loader, original_hashes_map)
     end
 
-    def initialize(*args, original_hashes_by_line)
+    def self.parse(text)
+      tree = Psych.parser.parse(text)
+      emitter = self.create(text)
+      # Not sure why, but "accept" returns an array with one element.
+      # Probably because the root of the YAML is a sequence by default?
+      emitter.accept(tree.handler.root).first
+    end
+
+    def initialize(*args, text)
       super(*args)
-      @original_hashes_by_line = original_hashes_by_line
+      _build_original_hashes_by_line_from_text(text)
     end
 
     def pluralization_map?(v)
@@ -25,7 +33,6 @@ module WcaI18n
       end
       return false
     end
-
 
     # Copy from the revive_hash method in https://github.com/ruby/psych/blob/e9e4567adefc52e6511df7060851bce9fe408082/lib/psych/visitors/to_ruby.rb
     # Except we override the generic case with our code.
@@ -73,21 +80,9 @@ module WcaI18n
       }
       hash
     end
-  end
 
-
-
-  class YAMLWithOriginalHashes < Struct.new(:comment, :value)
-    def self.parse(text)
-      tree = Psych.parser.parse(text)
-      emitter = ToRubyEmitter.create(_original_hashes_by_line_from_text(text))
-      # Not sure why, but "accept" returns an array with one element.
-      # Probably because the root of the YAML is a sequence by default?
-      emitter.accept(tree.handler.root).first
-    end
-
-    def self._original_hashes_by_line_from_text(text)
-      {}.tap do |hash|
+    def _build_original_hashes_by_line_from_text(text)
+      @original_hashes_by_line = {}.tap do |hash|
         # Build a hash mapping a line number to its comment
         text.each_line.with_index do |line, index|
           stripped_line = line.strip

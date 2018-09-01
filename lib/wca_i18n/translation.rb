@@ -1,6 +1,6 @@
 require "json"
 require "digest"
-require "wca_i18n/yaml_with_original_hashes"
+require "wca_i18n/yaml_to_enriched_ruby_hash"
 
 module WcaI18n
   class Translation
@@ -9,7 +9,7 @@ module WcaI18n
 
     def initialize(locale, file_content)
       self.locale = locale.to_s
-      self.data = YAMLWithOriginalHashes.parse(file_content)
+      self.data = YAMLToEnrichedRubyHash.parse(file_content)
     end
 
     def compare_to(base)
