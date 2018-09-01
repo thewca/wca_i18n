@@ -1,4 +1,4 @@
-RSpec.describe WcaI18n::YAMLWithOriginalHashes do
+RSpec.describe WcaI18n::YAMLToEnrichedRubyHash do
   let(:yml) {
     "# Leading comment
       en:
@@ -32,7 +32,7 @@ RSpec.describe WcaI18n::YAMLWithOriginalHashes do
   it "#parse_yml_with_original_hashes includes original hashes" do
     # This makes sure that only leaves gets turned into TranslatedLeaf,
     # and that pluralization are handled appropriately (ie: the whole map is considered a leaf).
-    expect(WcaI18n::YAMLWithOriginalHashes.parse(yml)).to eq({
+    expect(WcaI18n::YAMLToEnrichedRubyHash.parse(yml)).to eq({
       "en" => {
         "foo" => WcaI18n::TranslatedLeaf.new("bar", nil),
         "fiz" => WcaI18n::TranslatedLeaf.new("buzz", "abc"),
