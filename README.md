@@ -1,4 +1,4 @@
-# WcaI18n [![Build Status](https://travis-ci.org/thewca/wca-i18n.svg?branch=master)](https://travis-ci.org/thewca/wca-i18n)
+# WcaI18n [![Build Status](https://travis-ci.org/thewca/wca_i18n.svg?branch=master)](https://travis-ci.org/thewca/wca_i18n)
 
 Use this Gem to diff Rails translations.
 
@@ -34,7 +34,7 @@ $ wca_i18n en.yml *.yml
 There are two parts to this library: `WcaI18n::YAMLWithComments` (a YAML parser
 that preserves comments) and `WcaI18n::Translation` (used to load and diff
 translation YAML files). Until we have better documentation, it's best to look
-at our [specs](https://github.com/thewca/wca-i18n/tree/master/spec) for how to
+at our [specs](https://github.com/thewca/wca_i18n/tree/master/spec) for how to
 them.
 
 ## Development
@@ -45,7 +45,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/thewca/wca-i18n.
+Bug reports and pull requests are welcome on GitHub at https://github.com/thewca/wca_i18n.
 
 ## License
 
