@@ -6,7 +6,7 @@ require "wca_i18n/version"
 Gem::Specification.new do |spec|
   spec.name          = "wca_i18n"
   spec.version       = WcaI18n::VERSION
-  spec.authors       = ["Jeremy Fleischman"]
+  spec.authors       = ["WCA Software Team"]
   spec.email         = ["software@worldcubeassociation.org"]
 
   spec.summary       = %q{Track how up to date Rails translations are.}
