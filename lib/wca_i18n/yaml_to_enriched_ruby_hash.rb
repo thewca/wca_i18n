@@ -3,6 +3,7 @@ require "psych"
 module WcaI18n
   PLURALIZATION_KEYS = %w(zero one two few many other).freeze
   ORIGINAL_HASH_TAG = "#original_hash: ".freeze
+  SHOVEL = "<<".freeze
   TranslatedLeaf = Struct.new(:translated, :original_hash)
 
   # Re-implement some parts of the ToRuby emitter to inject our TranslatedLeaf where needs be
