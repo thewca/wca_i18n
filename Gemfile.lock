@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    wca_i18n (0.4.3)
+    wca_i18n (0.4.4)
       colorize (~> 0.8)
 
 GEM
